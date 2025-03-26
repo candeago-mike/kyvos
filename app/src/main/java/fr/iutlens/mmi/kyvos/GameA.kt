@@ -47,7 +47,7 @@ import fr.iutlens.mmi.kyvos.utils.loadSpritesheet
 import java.lang.reflect.Array.set
 import kotlin.math.floor
 
-fun makeGameA(): Game {
+fun makeGameA(perdu : ()->Unit): Game {
     val map = """
             66666666666
             61111111116
@@ -189,11 +189,11 @@ fun makeGameA(): Game {
     }
 
     fun TiledArea.dash() : TiledArea{
-        var compteur = 10
-        for(i in pieceArea.y0.toInt()..map.sizeY){
-            if(possible(x0,i.toFloat())){
+        var compteur = 0
+        val j = floor(y0 / h).toInt()
+        for(i in j+pieceArea.sizeY..map.sizeY){
+            if ( possible(pieceArea.x0,i.toFloat()) )
                 compteur+=1
-            }
         }
         pieceArea.y0+=compteur.toFloat()*tileMap.h
         return pieceArea
@@ -269,12 +269,14 @@ fun makeGameA(): Game {
         }
 
         padAction = { (dx: Float, dy: Float) ->
-            val nextX = pieceArea.x0 + dx * tileMap.w
-            val nextY = pieceArea.y0 + dy * tileMap.h
-            if (pieceArea.possible(nextX, nextY)) {
-                pieceArea.x0 = nextX
-                pieceArea.y0 = nextY
-                invalidate()
+            if (!pause) {
+                val nextX = pieceArea.x0 + dx * tileMap.w
+                val nextY = pieceArea.y0 + dy * tileMap.h
+                if (pieceArea.possible(nextX, nextY)) {
+                    pieceArea.x0 = nextX
+                    pieceArea.y0 = nextY
+                    invalidate()
+                }
             }
         }
 
@@ -284,16 +286,22 @@ fun makeGameA(): Game {
             update = {
                 if (!pause) {
                     val nextY = pieceArea.y0 + tileMap.h
-                    if (pieceArea.possible(pieceArea.x0, nextY)) {
-                        pieceArea.y0 = nextY
-                    } else {
+
+
+                    if (pieceArea.possible(4f * tileMap.w, 1f * tileMap.h)) {
+                        if (pieceArea.possible(pieceArea.x0, nextY)) {
+                            pieceArea.y0 = nextY
+                        } else {
                             pieceArea.pose()
                             pieceSuivante()
                             it.spriteList = pieceArea
                             invalidate()
                         }
+                    } else {
+                        perdu()
                     }
-
+                }
+                    //it.background = map.rotate()
                     checkLigne()
                     invalidate()
                 }
@@ -407,20 +415,62 @@ fun Accueil(onClick:()->Unit={}){
         )
     }
 }
-//@Preview
+
 @Composable
-fun GameOver(){
+fun BoutonYes(modifier: Modifier = Modifier,onClick: () -> Unit){
+    Image(
+        painter = painterResource(id = R.drawable.bouton_yes),
+        contentDescription = "Bouton Yes",
+        modifier = modifier
+            .size(80.dp)
+            .clickable { onClick() },
+    )
+}
+
+@Composable
+fun BoutonNo(modifier: Modifier = Modifier,onClick: () -> Unit){
+    Image(
+        painter = painterResource(id = R.drawable.bouton_no),
+        contentDescription = "Bouton No",
+        modifier = modifier
+            .size(80.dp)
+            .clickable { onClick() },
+    )
+}
+@Preview
+@Composable
+fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
     Box(Modifier
         .fillMaxSize()
-        .background(Color.Black.copy(alpha = 0.5f)) // Fond semi-transparent
+        .background(Color.Black.copy(alpha = 0.8f)) // Fond semi-transparent
     ){
 
         Text(text = "GAME OVER",
-            fontSize = 50.sp,
-            color = Color.White,
+            fontSize = 55.sp,
+            color = Color(0xFF6C1E01),
             fontFamily = fontperso,
             modifier = Modifier
-                .align(Alignment.Center))
+                .align(Alignment.TopCenter)
+                .padding(top=200.dp))
+
+        Text(text = "Play again ?",
+            fontSize = 36.sp,
+            color = Color(0xFFE05B11),
+            fontFamily = fontperso,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(bottom=150.dp))
+
+        BoutonYes(
+            modifier = Modifier
+                .align(Alignment.CenterStart),
+            onClick = onYes
+        )
+        BoutonNo(
+            modifier = Modifier
+                .align(Alignment.CenterEnd),
+            onClick = onNo
+        )
             Image(
                 painter = painterResource(id = R.drawable.pieces_cassees),
                 contentDescription = "Bouton Musique",
@@ -461,7 +511,7 @@ fun GameAPreview() {
 
     LocalContext.current.loadSpritesheet(R.drawable.decor, 6, 4, 1)
     LocalContext.current.loadSpritesheet(R.drawable.perso, 6, 4)
-    val game = makeGameA()
+    val game = makeGameA{}
         Box(Modifier.fillMaxSize()) {
             game.View(
                 modifier = Modifier

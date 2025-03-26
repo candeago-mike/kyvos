@@ -36,15 +36,15 @@ class MainActivity : ComponentActivity() {
         loadSound(R.raw.message)
 
 
-        val game = makeGameA()
+
         setContent {
             MyApplicationTheme {
 
                 var gameState by remember { mutableStateOf(GameState.HOME) }
+                var game by remember {  mutableStateOf(makeGameA{ gameState = GameState.PERDU}) }
 
                 val isPaused = (gameState == GameState.REGLAGE)
                     if (gameState == GameState.PLAYING || gameState == GameState.REGLAGE || gameState == GameState.PERDU) {
-                        if (game.gagne) {
 
                         Box(Modifier.fillMaxSize()) {
                             game.View(
@@ -54,7 +54,6 @@ class MainActivity : ComponentActivity() {
                             )
 
                             if (!isPaused) { // Désactive les interactions si le jeu est en pause
-                                val action1 = game.padAction ?: return@Box
                                 BouttonReglage(
                                     modifier = Modifier
                                         .size(75.dp)
@@ -72,7 +71,7 @@ class MainActivity : ComponentActivity() {
                                         .padding(16.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Pad(Modifier.matchParentSize(), action = action1)
+                                    Pad(Modifier.matchParentSize()){offset -> game.padAction?.let { it(offset) } }
 
                                     ButtonRotation(
                                         modifier = Modifier
@@ -107,11 +106,10 @@ class MainActivity : ComponentActivity() {
                                     game.invalidate()
                                 }
                             }else if(gameState == GameState.PERDU){
-                                GameOver()
+                                GameOver(onYes = {gameState=GameState.PLAYING
+                                    game = makeGameA{ gameState = GameState.PERDU}}, onNo = {gameState=GameState.HOME
+                                    game = makeGameA{ gameState = GameState.PERDU}})
                             }
-                        }
-                    } else if(game.gagne==false) {
-                        gameState = GameState.PERDU
                     }
                 }else{
                     Accueil { gameState = GameState.PLAYING }
@@ -122,7 +120,7 @@ class MainActivity : ComponentActivity() {
 
 }}    override fun onPause() {
         super.onPause()
-        mute = false
+        mute = true
     }
 }
 
