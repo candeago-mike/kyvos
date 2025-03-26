@@ -31,7 +31,7 @@ import kotlin.time.TimeSource
  * par dessus (spriteList) et un point de vue (transform)
  * Il est possible de préciser en plus les interactions (onDrag/onTap)
  */
-class Game(val background : Sprite,
+class Game(var background : Sprite,
            var spriteList : Sprite,
            val transform: CameraTransform,
            var onDragStart: (Game.(Offset) -> Unit)? = null,

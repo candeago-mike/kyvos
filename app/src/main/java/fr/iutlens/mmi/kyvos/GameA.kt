@@ -189,17 +189,14 @@ fun makeGameA(): Game {
     }
 
     fun TiledArea.dash() : TiledArea{
-        var compteur = 0
-        for(i in pieceArea.y0.toInt()..map.sizeY) {
-            if(possible(x0, i.toFloat())) {
-                compteur++ // Incrémentation du compteur
-            } else {
-                break // Arrêter si la position n'est plus possible
+        var compteur = 10
+        for(i in pieceArea.y0.toInt()..map.sizeY){
+            if(possible(x0,i.toFloat())){
+                compteur+=1
             }
         }
-        pieceArea.y0 += compteur.toFloat() * tileMap.h
+        pieceArea.y0+=compteur.toFloat()*tileMap.h
         return pieceArea
-
     }
 
 
