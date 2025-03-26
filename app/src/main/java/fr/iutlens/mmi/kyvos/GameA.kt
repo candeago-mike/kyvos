@@ -188,6 +188,20 @@ fun makeGameA(): Game {
                     map[i+di,j+dj] = get(di,dj)
     }
 
+    fun TiledArea.dash() : TiledArea{
+        var compteur = 0
+        for(i in pieceArea.y0.toInt()..map.sizeY) {
+            if(possible(x0, i.toFloat())) {
+                compteur++ // Incrémentation du compteur
+            } else {
+                break // Arrêter si la position n'est plus possible
+            }
+        }
+        pieceArea.y0 += compteur.toFloat() * tileMap.h
+        return pieceArea
+
+    }
+
 
     fun gravite(x: Int, y: Int) {
         for (j in y downTo 1) { // On part du bas vers le haut
@@ -251,7 +265,11 @@ fun makeGameA(): Game {
                 spriteList = pieceArea
             }
         }
-
+        onDash = {
+            val pieceDashed = pieceArea.dash()
+            spriteList = pieceDashed
+            invalidate()
+        }
 
         padAction = { (dx: Float, dy: Float) ->
             val nextX = pieceArea.x0 + dx * tileMap.w
@@ -272,20 +290,18 @@ fun makeGameA(): Game {
                     if (pieceArea.possible(pieceArea.x0, nextY)) {
                         pieceArea.y0 = nextY
                     } else {
-                        if (pieceArea.possible(pieceArea.x0+4f*tileMap.w,pieceArea.x0+1f*tileMap.h)){
                             pieceArea.pose()
                             pieceSuivante()
                             it.spriteList = pieceArea
                             invalidate()
                         }
                     }
-                    gagne=false
 
                     checkLigne()
                     invalidate()
                 }
             }
-    }}
+    }
 val fontperso = FontFamily(
     Font(R.font.baijamjureemedium)
 )
@@ -356,12 +372,13 @@ fun pageReglage(onClick:()->Unit={}) {
     }
 }
 @Composable
-fun BoutonPawh(modifier: Modifier = Modifier){
+fun BoutonPawh(modifier: Modifier = Modifier,onClick: () -> Unit){
     Image(
         painter = painterResource(id = R.drawable.bouton_vite),
         contentDescription = "Bouton Pawh",
         modifier = modifier
             .size(300.dp)
+            .clickable { onClick() },
     )
 }
 @Composable
@@ -493,7 +510,10 @@ fun GameAPreview() {
                     .size(140.dp)
                     .padding(32.dp)
                     .offset(y = (-50).dp, x = (-20).dp), // Décale légèrement vers le haut
-
+                onClick = {
+                    game.onDash?.let { it(game,Offset.Zero) }
+                    game.invalidate()
+                }
             )
         }
     }

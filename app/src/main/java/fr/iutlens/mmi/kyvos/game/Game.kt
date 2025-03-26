@@ -37,7 +37,8 @@ class Game(val background : Sprite,
            var onDragStart: (Game.(Offset) -> Unit)? = null,
            var onDragMove:  (Game.(Offset) -> Unit)? = null,
            var onTap: (Game.(Offset)-> Unit)? = null,
-           var onRotate : (Game.(Offset)->Unit)? = null
+           var onRotate : (Game.(Offset)->Unit)? = null,
+           var onDash : (Game.(Offset)->Unit)? = null
         ) {
     var padAction: ((Offset) -> Unit)? = null
     var joystickPosition: JoystickPosition? = null

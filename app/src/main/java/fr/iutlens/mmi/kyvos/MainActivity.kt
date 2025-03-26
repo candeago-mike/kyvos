@@ -94,7 +94,10 @@ class MainActivity : ComponentActivity() {
                                             y = (-50).dp,
                                             x = (-20).dp
                                         ), // Décale légèrement vers le haut
-
+                                    onClick = {
+                                        game.onDash?.let { it(game, Offset.Zero) }
+                                        game.invalidate()
+                                    }
                                 )
                             }
                             if (gameState == GameState.REGLAGE) {
