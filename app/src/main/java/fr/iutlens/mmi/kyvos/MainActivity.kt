@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
             MyApplicationTheme {
 
                 var gameState by remember { mutableStateOf(GameState.HOME) }
-                var game by remember {  mutableStateOf(makeGameA{ gameState = GameState.PERDU}) }
+                var game by remember {  mutableStateOf(makeGameA{ gameState = GameState.PERDU }) }
 
                 val isPaused = (gameState == GameState.REGLAGE)
                     if (gameState == GameState.PLAYING || gameState == GameState.REGLAGE || gameState == GameState.PERDU) {

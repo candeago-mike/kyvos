@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import fr.iutlens.mmi.kyvos.game.Game
+import fr.iutlens.mmi.kyvos.game.sprite.SubMap
 import fr.iutlens.mmi.kyvos.game.sprite.TiledArea
 import fr.iutlens.mmi.kyvos.game.sprite.rotate
 import fr.iutlens.mmi.kyvos.game.sprite.tiledArea
@@ -49,28 +50,33 @@ import kotlin.math.floor
 
 fun makeGameA(perdu : ()->Unit): Game {
     val map = """
-            66666666666
-            61111111116
-            61111111116
-            61111111116
-            61111111116
-            61111111116
-            61111111116
-            61111111116
-            61111111116
-            61111111116
-            61111111116
-            61111111116
-            61111111116
-            611189a1116
-            6111efg1116
-            6111klm1116
-            66666666666
-            66666666666
-            66666666666
-            66666666666
-            66666666666
-            66666666666
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            11111111111189a111111111111
+            111111111111efg111111111111
+            111111111111klm111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
         """.trimIndent().toMutableTileMap(
         "123456"+
                 "789abc"+
@@ -153,17 +159,31 @@ fun makeGameA(perdu : ()->Unit): Game {
         }
     }
 
-    val tileMap = R.drawable.decor.tiledArea(map)
-    var indice = 0
+    val sousMap_rotation_gauche = SubMap(map, 9, 15) { x, y -> (-y+26) to (x+9) }
+    val sousMap_rotation180 = SubMap(map, 9, 15) { x, y -> (8 - x + 9) to (14 - y + 12) }
+    val sousMap_rotaiondroit = SubMap(map, 9, 15) { x, y -> (y) to (-x+17) }
+    val sousMap_vertcal = SubMap(map, 9, 15) { x, y -> (x+9) to y }
 
-    var pieceArea = R.drawable.decor.tiledArea(pieces[indice])
+
+    val tableau_map = listOf(sousMap_vertcal,sousMap_rotaiondroit,sousMap_rotation180,sousMap_rotation_gauche)
+    var indice_piece = 0
+    var indice_map = 0
+
+    var tileMap = R.drawable.decor.tiledArea(tableau_map[indice_map])
+
+
+    var pieceArea = R.drawable.decor.tiledArea(pieces[indice_piece])
     fun pieceSuivante(){
-        indice = (indice+1).mod(pieces.size)
-        pieceArea = R.drawable.decor.tiledArea(pieces[indice])
+        indice_piece = (indice_piece+1).mod(pieces.size)
+        pieceArea = R.drawable.decor.tiledArea(pieces[indice_piece])
         pieceArea.x0 = 4f*tileMap.w
         pieceArea.y0 = 1f*tileMap.h
     }
 
+    fun Mapsuivante(){
+        indice_map = (indice_map+1).mod(tableau_map.size)
+        tileMap = R.drawable.decor.tiledArea(tableau_map[indice_map])
+    }
 
     pieceArea.x0 = 4f*tileMap.w
     pieceArea.y0 = 1f*tileMap.h
@@ -175,6 +195,7 @@ fun makeGameA(perdu : ()->Unit): Game {
                 if(codeBlock(get(di,dj))  &&
                     codeBlock(tileMap[i+di,j+dj]))
                     return false
+                else if (i+di !in 0 until tableau_map[indice_map].sizeX || j+dj !in 0 until tableau_map[indice_map].sizeY) return false
         return true
     }
 
@@ -185,13 +206,13 @@ fun makeGameA(perdu : ()->Unit): Game {
         for (di in 0..<sizeX)
             for (dj in 0 ..<sizeY)
                 if(codeBlock(get(di,dj)))
-                    map[i+di,j+dj] = get(di,dj)
+                    tableau_map[indice_map][i+di,j+dj] = get(di,dj)
     }
 
     fun TiledArea.dash() : TiledArea{
         var compteur = 0
         val j = floor(y0 / h).toInt()
-        for(i in j+pieceArea.sizeY..map.sizeY){
+        for(i in j+pieceArea.sizeY..tableau_map[indice_map].sizeY){
             if ( possible(pieceArea.x0,i.toFloat()) )
                 compteur+=1
         }
@@ -202,12 +223,12 @@ fun makeGameA(perdu : ()->Unit): Game {
 
     fun gravite(x: Int, y: Int) {
         for (j in y downTo 1) { // On part du bas vers le haut
-            for (i in 0 until map.sizeX) {
-                if (map.get(i, j) != 0) { // Si la case contient un bloc
+            for (i in 0 until tableau_map[indice_map].sizeX) {
+                if (tableau_map[indice_map].get(i, j) != 0) { // Si la case contient un bloc
                     var newJ = j
-                    while (newJ + 1 < map.sizeY && map.get(i, newJ + 1) == 0) { // Tant qu'il peut tomber
-                        map[i, newJ + 1] = map.get(i, newJ) // Déplace le bloc vers le bas
-                        map[i, newJ] = 0 // Vide l'ancienne case
+                    while (newJ + 1 < tableau_map[indice_map].sizeY && tableau_map[indice_map].get(i, newJ + 1) == 0) { // Tant qu'il peut tomber
+                        tableau_map[indice_map][i, newJ + 1] = tableau_map[indice_map].get(i, newJ) // Déplace le bloc vers le bas
+                        tableau_map[indice_map][i, newJ] = 0 // Vide l'ancienne case
                         newJ++ // Continue à descendre
                     }
                 }
@@ -217,21 +238,21 @@ fun makeGameA(perdu : ()->Unit): Game {
 
     fun resetLigne(x: Int, y: Int) {
         for (i in 0..<6) {
-            map[(x - i), y] = 0
+            tableau_map[indice_map][(x - i), y] = 0
         }
         gravite(x,y)
     }
 
     fun checkLigne() {
-        for (j in 0..<map.sizeY) {
+        for (j in 0..<tableau_map[indice_map].sizeY) {
             var count = 0
-            for (i in 0..<map.sizeX) {
-                if (map.get(i, j) == 2) {
+            for (i in 0..<tableau_map[indice_map].sizeX) {
+                if (tableau_map[indice_map].get(i, j) == 2) {
                     count += 1
                 } else {
                     count = 0
                 }
-                if (count == 6) {
+                if (count == 8) {
                     resetLigne(i, j)
                 }
             }
@@ -295,15 +316,17 @@ fun makeGameA(perdu : ()->Unit): Game {
                             pieceArea.pose()
                             pieceSuivante()
                             it.spriteList = pieceArea
+                            Mapsuivante()
+                            it.background = tileMap
                             invalidate()
                         }
                     } else {
                         perdu()
                     }
                 }
-                    //it.background = map.rotate()
-                    checkLigne()
-                    invalidate()
+
+                checkLigne()
+                invalidate()
                 }
             }
     }
@@ -353,7 +376,10 @@ fun pageReglage(onClick:()->Unit={}) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF578382).copy(alpha = 0.9f), shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)) // Contenu avec opacité
+                    .background(
+                        Color(0xFF578382).copy(alpha = 0.9f),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                    ) // Contenu avec opacité
                     .padding(16.dp)
                     .align(Alignment.Center)
             ) {
@@ -437,7 +463,7 @@ fun BoutonNo(modifier: Modifier = Modifier,onClick: () -> Unit){
             .clickable { onClick() },
     )
 }
-@Preview
+//@Preview
 @Composable
 fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
     Box(Modifier
@@ -451,7 +477,7 @@ fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
             fontFamily = fontperso,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top=200.dp))
+                .padding(top = 200.dp))
 
         Text(text = "Play again ?",
             fontSize = 36.sp,
@@ -459,7 +485,7 @@ fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
             fontFamily = fontperso,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(bottom=150.dp))
+                .padding(bottom = 150.dp))
 
         BoutonYes(
             modifier = Modifier

@@ -12,6 +12,10 @@ interface TileMap {
     val sizeY : Int
 }
 
+interface MutableTileMap : TileMap{
+    operator fun set(x :Int, y : Int, value: Int)
+}
+
 fun TileMap.indexToCoord(ndx: Int) = ndx.mod(sizeX) to ndx/sizeX
 fun TileMap.coordToIndex(x: Int, y:Int) = x+y*sizeX
 
@@ -30,7 +34,7 @@ operator fun TileMap.contains(coord: Pair<Int,Int>) = coord.first in 0..<sizeX &
  *
  * @param from TileMap copiée dans ArrayTileMap
  */
-class ArrayTileMap(from : TileMap, newSizeX:Int = from.sizeX, newSizeY:Int = from.sizeY, default:Int = 0) : TileMap {
+class ArrayTileMap(from : TileMap, newSizeX:Int = from.sizeX, newSizeY:Int = from.sizeY, default:Int = 0) :  MutableTileMap {
     override val sizeX = newSizeX
     override val sizeY = newSizeY
     val data = IntArray(sizeX*sizeY){
@@ -46,7 +50,20 @@ class ArrayTileMap(from : TileMap, newSizeX:Int = from.sizeX, newSizeY:Int = fro
      * @param y
      * @param value
      */
-    operator fun set(x: Int, y: Int, value:Int) {data[coordToIndex(x,y)]= value}
+    override operator fun set(x: Int, y: Int, value:Int) {data[coordToIndex(x,y)]= value}
+}
+
+class SubMap(val from : MutableTileMap, override val sizeX : Int, override val sizeY : Int, var transform : (Int, Int) -> Pair<Int,Int>) : MutableTileMap{
+    override fun set(x: Int, y: Int, value: Int) {
+        val (xx,yy) = transform(x,y)
+        from[xx, yy] = value
+    }
+
+    override fun get(x: Int, y: Int): Int {
+        val (xx,yy) = transform(x,y)
+        return from[xx,yy]
+    }
+
 }
 
 /**
