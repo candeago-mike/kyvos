@@ -113,7 +113,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }else{
                     Accueil { gameState = GameState.PLAYING }
-
                 }
                 Music(id = R.raw.jungle)
             }

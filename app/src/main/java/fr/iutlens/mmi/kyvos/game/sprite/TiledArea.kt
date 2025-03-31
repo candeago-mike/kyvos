@@ -1,8 +1,10 @@
 package fr.iutlens.mmi.kyvos.game.sprite
 
 import android.graphics.RectF
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
 import fr.iutlens.mmi.kyvos.utils.SpriteSheet
 
 /**
@@ -30,10 +32,15 @@ class TiledArea(private val sprite: SpriteSheet, private val data: TileMap) : Sp
 
     var x0 = 0f
     var y0 = 0f
+    var angle = 0f
     var action: (TiledArea.()->Unit)? = null
 
     override fun paint(drawScope: DrawScope, elapsed: Long) {
-        drawScope.translate(x0,y0) {
+        drawScope.withTransform({
+            translate(x0,y0)
+            rotate(angle, Offset(boundingBox.centerX(),boundingBox.centerY()))
+
+        }) {
             for (y in 0 until sizeY) {
                 for (x in 0 until sizeX) {
                     sprite.paint(

@@ -45,6 +45,7 @@ import fr.iutlens.mmi.kyvos.game.sprite.toMutableTileMap
 import fr.iutlens.mmi.kyvos.game.transform.Constraint
 import fr.iutlens.mmi.kyvos.game.transform.GenericTransform
 import fr.iutlens.mmi.kyvos.utils.loadSpritesheet
+import kotlinx.coroutines.delay
 import java.lang.reflect.Array.set
 import kotlin.math.floor
 
@@ -83,10 +84,45 @@ fun makeGameA(perdu : ()->Unit): Game {
                 "defghi"+
                 "jklmno"
     )
+
+    val map_affiche = """
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            11111111111189a111111111111
+            111111111111efg111111111111
+            111111111111klm111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+            111111111111111111111111111
+        """.trimIndent().toMutableTileMap(
+        "123456"+
+                "789abc"+
+                "defghi"+
+                "jklmno"
+    )
     val pieces = listOf(
             """
-        030
-        333
+        040
+        444
         """.trimIndent().toMutableTileMap(
                 "123456"+
                         "789abc"+
@@ -94,9 +130,9 @@ fun makeGameA(perdu : ()->Unit): Game {
                         "jklmn0"
             ),
             """
-        30
-        33
-        03
+        40
+        44
+        04
         """.trimIndent().toMutableTileMap(
                 "123456"+
                         "789abc"+
@@ -105,8 +141,8 @@ fun makeGameA(perdu : ()->Unit): Game {
             ),
 
             """
-        33
-        33
+        44
+        44
         """.trimIndent().toMutableTileMap(
                 "123456"+
                         "789abc"+
@@ -114,9 +150,9 @@ fun makeGameA(perdu : ()->Unit): Game {
                         "jklmn0"
             ),
         """
-        03
-        33
-        30
+        04
+        44
+        40
         """.trimIndent().toMutableTileMap(
             "123456"+
                     "789abc"+
@@ -124,9 +160,9 @@ fun makeGameA(perdu : ()->Unit): Game {
                     "jklmn0"
         ),
         """
-        30
-        30
-        33
+        40
+        40
+        44
         """.trimIndent().toMutableTileMap(
             "123456"+
                     "789abc"+
@@ -134,9 +170,9 @@ fun makeGameA(perdu : ()->Unit): Game {
                     "jklmn0"
         ),
         """
-        03
-        03
-        33
+        04
+        04
+        44
         """.trimIndent().toMutableTileMap(
             "123456"+
                     "789abc"+
@@ -144,7 +180,10 @@ fun makeGameA(perdu : ()->Unit): Game {
                     "jklmn0"
         ),
         """
-        3333
+        4
+        4
+        4
+        4
         """.trimIndent().toMutableTileMap(
             "123456"+
                     "789abc"+
@@ -168,25 +207,27 @@ fun makeGameA(perdu : ()->Unit): Game {
     val tableau_map = listOf(sousMap_vertcal,sousMap_rotaiondroit,sousMap_rotation180,sousMap_rotation_gauche)
     var indice_piece = 0
     var indice_map = 0
+    var angle_cible = 0
 
     var tileMap = R.drawable.decor.tiledArea(tableau_map[indice_map])
+    val tileMap_affiche = R.drawable.decor.tiledArea(map)
+    tileMap_affiche.x0=-9f*tileMap_affiche.w
 
 
     var pieceArea = R.drawable.decor.tiledArea(pieces[indice_piece])
-    fun pieceSuivante(){
-        indice_piece = (indice_piece+1).mod(pieces.size)
+    fun pieceSuivante() {
+        indice_piece = (0 until pieces.size).random() // Génère un indice aléatoire entre 0 et pieces.size - 1
         pieceArea = R.drawable.decor.tiledArea(pieces[indice_piece])
-        pieceArea.x0 = 4f*tileMap.w
-        pieceArea.y0 = 1f*tileMap.h
+        pieceArea.x0 = 3f * tileMap.w
     }
+
 
     fun Mapsuivante(){
         indice_map = (indice_map+1).mod(tableau_map.size)
         tileMap = R.drawable.decor.tiledArea(tableau_map[indice_map])
     }
 
-    pieceArea.x0 = 4f*tileMap.w
-    pieceArea.y0 = 1f*tileMap.h
+    pieceArea.x0 = 3f*tileMap.w
     fun TiledArea.possible(x: Float, y: Float): Boolean {
         val i = floor(x / w).toInt()
         val j = floor(y / h).toInt()
@@ -209,35 +250,38 @@ fun makeGameA(perdu : ()->Unit): Game {
                     tableau_map[indice_map][i+di,j+dj] = get(di,dj)
     }
 
-    fun TiledArea.dash() : TiledArea{
+    fun TiledArea.dash(): TiledArea {
         var compteur = 0
         val j = floor(y0 / h).toInt()
-        for(i in j+pieceArea.sizeY..tableau_map[indice_map].sizeY){
-            if ( possible(pieceArea.x0,i.toFloat()) )
-                compteur+=1
+
+        for (i in (j + pieceArea.sizeY -1) until tableau_map[indice_map].sizeY) {
+            if (possible(pieceArea.x0, i.toFloat() * h)) {
+                compteur++
+            } else {
+                break
+            }
         }
-        pieceArea.y0+=compteur.toFloat()*tileMap.h
+
+        pieceArea.y0 += compteur * tileMap.h
         return pieceArea
     }
 
 
+
     fun gravite(x: Int, y: Int) {
-        for (j in y downTo 1) { // On part du bas vers le haut
-            for (i in 0 until tableau_map[indice_map].sizeX) {
-                if (tableau_map[indice_map].get(i, j) != 0) { // Si la case contient un bloc
-                    var newJ = j
-                    while (newJ + 1 < tableau_map[indice_map].sizeY && tableau_map[indice_map].get(i, newJ + 1) == 0) { // Tant qu'il peut tomber
-                        tableau_map[indice_map][i, newJ + 1] = tableau_map[indice_map].get(i, newJ) // Déplace le bloc vers le bas
-                        tableau_map[indice_map][i, newJ] = 0 // Vide l'ancienne case
-                        newJ++ // Continue à descendre
-                    }
-                }
+        for (j in y downTo 1) { // On commence à la ligne supprimée et on descend
+            for (i in 0..<tableau_map[indice_map].sizeX) {
+                tableau_map[indice_map][i, j] = tableau_map[indice_map][i, j - 1] // Décale chaque bloc vers le bas
             }
+        }
+        // Remplit la première ligne avec des 0 (vide)
+        for (i in 0..<tableau_map[indice_map].sizeX) {
+            tableau_map[indice_map][i, 0] = 0
         }
     }
 
     fun resetLigne(x: Int, y: Int) {
-        for (i in 0..<6) {
+        for (i in 0..<9) {
             tableau_map[indice_map][(x - i), y] = 0
         }
         gravite(x,y)
@@ -247,12 +291,12 @@ fun makeGameA(perdu : ()->Unit): Game {
         for (j in 0..<tableau_map[indice_map].sizeY) {
             var count = 0
             for (i in 0..<tableau_map[indice_map].sizeX) {
-                if (tableau_map[indice_map].get(i, j) == 2) {
+                if (tableau_map[indice_map].get(i, j) == 3) {
                     count += 1
                 } else {
                     count = 0
                 }
-                if (count == 8) {
+                if (count == 9) {
                     resetLigne(i, j)
                 }
             }
@@ -265,7 +309,7 @@ fun makeGameA(perdu : ()->Unit): Game {
 
 
     return Game(
-        background = tileMap,
+        background = tileMap_affiche,
         spriteList = pieceArea,
         transform = GenericTransform(
             Constraint.Fill(tileMap)
@@ -302,22 +346,26 @@ fun makeGameA(perdu : ()->Unit): Game {
         }
 
         invalidate()
-        animationDelayMs = 500
+        animationDelayMs = 10
 
             update = {
                 if (!pause) {
-                    val nextY = pieceArea.y0 + tileMap.h
-
+                    val nextY = pieceArea.y0 + tileMap.h*0.1f
+                    val nextY_test = pieceArea.y0 + 1f*tileMap.h
+                    if (angle_cible != tileMap_affiche.angle.toInt()) {
+                        tileMap_affiche.angle = (tileMap_affiche.angle+5f)%360
+                    }
 
                     if (pieceArea.possible(4f * tileMap.w, 1f * tileMap.h)) {
-                        if (pieceArea.possible(pieceArea.x0, nextY)) {
+                        if (pieceArea.possible(pieceArea.x0, nextY_test)) {
                             pieceArea.y0 = nextY
                         } else {
                             pieceArea.pose()
+                            checkLigne()
                             pieceSuivante()
                             it.spriteList = pieceArea
                             Mapsuivante()
-                            it.background = tileMap
+                            angle_cible = (angle_cible+90)%360
                             invalidate()
                         }
                     } else {
@@ -325,7 +373,6 @@ fun makeGameA(perdu : ()->Unit): Game {
                     }
                 }
 
-                checkLigne()
                 invalidate()
                 }
             }
