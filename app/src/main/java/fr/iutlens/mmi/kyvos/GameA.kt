@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -107,8 +108,7 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
                         "defghi"+
                         "jklmn0"
             ),
-
-            """
+        """
         44
         44
         """.trimIndent().toMutableTileMap(
@@ -152,6 +152,214 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
         4
         4
         4
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        030
+        333
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        30
+        33
+        03
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+
+        """
+        33
+        33
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        03
+        33
+        30
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        30
+        30
+        33
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        03
+        03
+        33
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        3
+        3
+        3
+        3
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),"""
+        050
+        555
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        50
+        55
+        05
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+
+        """
+        55
+        55
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        05
+        55
+        50
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        50
+        50
+        55
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        05
+        05
+        55
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        5
+        5
+        5
+        5
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),"""
+        020
+        222
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        20
+        22
+        02
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+
+        """
+        22
+        22
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        02
+        22
+        20
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        20
+        20
+        22
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        02
+        02
+        22
+        """.trimIndent().toMutableTileMap(
+            "123456"+
+                    "789abc"+
+                    "defghi"+
+                    "jklmn0"
+        ),
+        """
+        2
+        2
+        2
+        2
         """.trimIndent().toMutableTileMap(
             "123456"+
                     "789abc"+
@@ -260,7 +468,7 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
         for (j in 0..<tableau_map[indice_map].sizeY) {
             var count = 0
             for (i in 0..<tableau_map[indice_map].sizeX) {
-                if (tableau_map[indice_map].get(i, j) == 3) {
+                if (tableau_map[indice_map].get(i, j) == 1 || tableau_map[indice_map].get(i, j) == 2 || tableau_map[indice_map].get(i, j) == 3 || tableau_map[indice_map].get(i, j) == 4) {
                     count += 1
                 } else {
                     count = 0
@@ -300,7 +508,7 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
         padAction = { (dx: Float, dy: Float) ->
             if (!pause) {
                 val nextX = pieceArea.x0 + dx * tileMap.w
-                val nextY = pieceArea.y0 + dy * tileMap.h
+                val nextY = pieceArea.y0 + dy.coerceAtLeast(0f) * tileMap.h
                 if (pieceArea.possible(nextX, nextY)) {
                     pieceArea.x0 = nextX
                     pieceArea.y0 = nextY
@@ -328,6 +536,7 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
                             checkLigne()
                             pieceSuivante()
                             it.spriteList = pieceArea
+
                             Mapsuivante()
                             angle_cible = (angle_cible+90)%360
                             invalidate()
@@ -375,7 +584,6 @@ fun ButtonAide( modifier: Modifier = Modifier,onAide: () -> Unit){
             .clickable { onAide() },
     )}
 
-
 @Composable
 fun BouttonReglage( modifier: Modifier = Modifier,onClick: () -> Unit){
     Image(
@@ -386,6 +594,8 @@ fun BouttonReglage( modifier: Modifier = Modifier,onClick: () -> Unit){
             .clickable { onClick() },
     )
 }
+
+@Preview
 @Composable
 fun pageReglage(onClick:()->Unit={},onMute:()->Unit={}) {
     Dialog(onDismissRequest = { }) {
@@ -396,14 +606,17 @@ fun pageReglage(onClick:()->Unit={},onMute:()->Unit={}) {
                 .padding(16.dp)
         ) {
 
-            BoutonContinue(
+            BoutonFermer(
                 modifier = Modifier.align(Alignment.TopEnd),
                 onClick =onClick
             )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF578382).copy(alpha = 0.9f), shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)) // Contenu avec opacité
+                    .background(
+                        Color(0xFF578382).copy(alpha = 0.9f),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                    ) // Contenu avec opacité
                     .padding(16.dp)
                     .align(Alignment.Center)
             ) {
@@ -439,8 +652,10 @@ fun BoutonPawh(modifier: Modifier = Modifier,onClick: () -> Unit){
             .clickable { onClick() },
     )
 }
+
+
 @Composable
-fun BoutonContinue(modifier: Modifier = Modifier,onClick: () -> Unit){
+fun BoutonFermer(modifier: Modifier = Modifier,onClick: () -> Unit){
     Image(
         painter = painterResource(id = R.drawable.bouton_x),
         contentDescription = "Close the parameters",
@@ -456,9 +671,11 @@ fun BoutonMusique(modifier: Modifier = Modifier, onClick: () -> Unit){
         contentDescription = "Bouton Musique",
         modifier = modifier
             .size(50.dp)
-            .clickable {onClick()}
+            .clickable { onClick() }
     )
 }
+
+
 @Composable
 fun Accueil(onClick:()->Unit={}){
     Box(Modifier.fillMaxSize()) {
@@ -469,6 +686,7 @@ fun Accueil(onClick:()->Unit={}){
         )
     }
 }
+
 @Composable
 fun BoutonCredits(modifier: Modifier = Modifier,onCredits: () -> Unit){
     Image(
@@ -477,9 +695,10 @@ fun BoutonCredits(modifier: Modifier = Modifier,onCredits: () -> Unit){
         modifier = modifier
             .size(150.dp)
             .clickable { onCredits() }
-            .padding(top=100.dp)
+            .padding(top = 100.dp)
     )
 }
+
 @Composable
 fun BoutonYes(modifier: Modifier = Modifier,onClick: () -> Unit){
     Image(
@@ -492,22 +711,27 @@ fun BoutonYes(modifier: Modifier = Modifier,onClick: () -> Unit){
 }
 
 @Composable
-fun BoutonHome(modifier: Modifier = Modifier,onHome: () -> Unit){
+fun BoutonNo(modifier: Modifier = Modifier,onClick: () -> Unit){
     Image(
-        painter = painterResource(id = R.drawable.icone_home),
-        contentDescription = "Button Home",
+        painter = painterResource(id = R.drawable.bouton_no),
+        contentDescription = "Bouton No",
         modifier = modifier
-            .size(50.dp)
-            .clickable { onHome() },
+            .size(80.dp)
+            .clickable { onClick() },
     )
 }
 
+
 @Composable
-fun Credits(modifier: Modifier = Modifier){
+fun Credits(modifier: Modifier = Modifier, onClick: () -> Unit={}){
     Box(Modifier
         .fillMaxSize()
-        .background( Color(0xFF0A0B0C),)
+        .background(Color(0xFF0A0B0C),)
     ) {
+        BoutonFermer(
+            modifier = Modifier.align(Alignment.TopEnd),
+            onClick =onClick
+        )
         Text(
             text = "Credits",
             fontSize = 55.sp,
@@ -535,7 +759,7 @@ fun Credits(modifier: Modifier = Modifier){
             lineHeight = 40.sp,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(horizontal=25.dp)
+                .padding(horizontal = 25.dp)
         )
         Text(
             text = "Powered by Android Studio",
@@ -544,8 +768,8 @@ fun Credits(modifier: Modifier = Modifier){
             fontFamily = fontperso,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(bottom=250.dp)
-                .padding(horizontal=25.dp)
+                .padding(bottom = 250.dp)
+                .padding(horizontal = 25.dp)
 
         )
         Text(
@@ -555,9 +779,40 @@ fun Credits(modifier: Modifier = Modifier){
             fontFamily = fontperso,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom=50.dp)
-                .padding(horizontal=25.dp)
+                .padding(bottom = 50.dp)
+                .padding(horizontal = 25.dp)
 
+        )
+    }
+}
+
+@Composable
+fun BoutonHome(modifier: Modifier = Modifier,onHome: () -> Unit){
+    Image(
+        painter = painterResource(id = R.drawable.icone_home),
+        contentDescription = "Button Home",
+        modifier = modifier
+            .size(50.dp)
+            .clickable { onHome() },
+    )
+}
+
+@Preview
+@Composable
+fun Aide(modifier : Modifier = Modifier, onClick: () -> Unit={}) {
+    Box(Modifier
+        .fillMaxSize()
+        .background(Color(0xFF0A0B0C))
+    ){
+        Image(
+            painter = painterResource(id = R.drawable.help),
+            contentDescription = "Button Home",
+            modifier = modifier
+                .fillMaxSize()
+        )
+        BoutonFermer(
+            modifier = Modifier.align(Alignment.TopEnd),
+            onClick =onClick
         )
     }
 }
@@ -566,21 +821,27 @@ fun Credits(modifier: Modifier = Modifier){
 fun QuitHome(modifier: Modifier = Modifier, onYes: () -> Unit={},onNo: () -> Unit={}){
     Box(Modifier
         .fillMaxSize()
-        .background( Color(0xFF0A0B0C).copy(alpha = 0.8f)) // Fond semi-transparent
+        .background(Color(0xFF0A0B0C).copy(alpha = 0.8f)) // Fond semi-transparent
     ) {
         Text(
             text = "Are you sure to quit the game ?",
             fontSize = 32.sp,
             color = Color(0xFFFFF9F0),
             fontFamily = fontperso,
-
-            )
-        Row {
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = -50.dp),
+            textAlign = TextAlign.Center
+        )
+        Row (modifier = Modifier.align(Alignment.Center)
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.bouton_yes),
                 contentDescription = "Button Yes",
                 modifier= Modifier
                     .size(120.dp)
+                    .offset(x = -20.dp, y = 70.dp)
+                    .clickable { onYes() },
             )
 
             Image(
@@ -588,61 +849,60 @@ fun QuitHome(modifier: Modifier = Modifier, onYes: () -> Unit={},onNo: () -> Uni
                 contentDescription = "Button No",
                 modifier= Modifier
                     .size(120.dp)
+                    .offset(x = 20.dp, y = 70.dp)
+                    .clickable { onNo() },
             )
         }
 
     }
 }
-@Composable
-fun BoutonNo(modifier: Modifier = Modifier,onClick: () -> Unit){
-    Image(
-        painter = painterResource(id = R.drawable.bouton_no),
-        contentDescription = "Bouton No",
-        modifier = modifier
-            .size(80.dp)
-            .clickable { onClick() },
-    )
-}
-//@Preview
+@Preview
 @Composable
 fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
     Box(Modifier
         .fillMaxSize()
-        .background( Color(0xFF0A0B0C).copy(alpha = 0.8f)) // Fond semi-transparent
+        .background(Color(0xFF0A0B0C).copy(alpha = 0.8f)) // Fond semi-transparent
     ){
 
         Text(text = "GAME OVER",
             fontSize = 55.sp,
-            color = Color(0xFF6C1E01),
-            fontFamily = fontperso,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top=200.dp))
-
-        Text(text = "Play again ?",
-            fontSize = 36.sp,
             color = Color(0xFFE05B11),
             fontFamily = fontperso,
             modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 150.dp))
+
+        Text(text = "Play again ?",
+            fontSize = 36.sp,
+            color = Color(0xFFFFF9F0),
+            fontFamily = fontperso,
+            modifier = Modifier
                 .align(Alignment.Center)
-                .padding(bottom=150.dp))
-        BoutonYes(
-            modifier = Modifier
-                .align(Alignment.CenterStart),
-            onClick = onYes
-        )
-        BoutonNo(
-            modifier = Modifier
-                .align(Alignment.CenterEnd),
-            onClick = onNo
-        )
+                .padding(bottom = 200.dp))
         Image(
             painter = painterResource(id = R.drawable.pieces_cassees),
             contentDescription = "Bouton Musique",
             modifier = Modifier
                 .size(400.dp)
                 .align(Alignment.BottomCenter)
+                .offset(y = 10.dp)
         )
+        Row (modifier = Modifier.align(Alignment.Center)
+        ) {
+            BoutonYes(
+                modifier= Modifier
+                    .size(120.dp)
+                    .offset(x = -20.dp, y = -10.dp),
+                onClick=onYes
+            )
+
+            BoutonNo(
+                modifier= Modifier
+                    .size(120.dp)
+                    .offset(x = 20.dp, y = -10.dp),
+                onClick=onNo
+            )
+        }
 
     }
 }
@@ -662,13 +922,16 @@ fun Video(id: Int, modifier: Modifier = Modifier, isLooping: Boolean = true) {
 
 @Composable
 fun TestVideo() {
-    Video(R.raw.fond_kyvos, Modifier.fillMaxSize())
+    Video(
+        R.raw.fond_kyvos,
+        Modifier.fillMaxSize()
+    )
 }
 
 
 enum class GameState{HOME,PLAYING,REGLAGE,PERDU,AIDE,CREDITS,QUITHOME}
+
 @Preview
-@SuppressLint("SuspiciousIndentation")
 @Composable
 fun GameAPreview() {
     var gameState by remember { mutableStateOf(GameState.HOME) }
@@ -676,60 +939,64 @@ fun GameAPreview() {
     LocalContext.current.loadSpritesheet(R.drawable.decor, 6, 4, 1)
     LocalContext.current.loadSpritesheet(R.drawable.perso, 6, 4)
     val game = makeGameA{}
-
     Box(Modifier.fillMaxSize()) {
-            game.View(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)
+        game.View(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(androidx.compose.ui.graphics.Color(0xFF0A0B0C),)
+        )
+        val action1 = game.padAction ?: return@Box
+        BouttonReglage(
+            modifier = Modifier
+                .size(75.dp)
+                .padding(16.dp)
+                .align(Alignment.TopEnd),
+            onClick = {}
+        )
+        ButtonAide (
+            modifier = Modifier
+                .size(75.dp)
+                .padding(16.dp)
+                .align(Alignment.TopEnd),
+
+            onAide= {}
+        )
+        Box(
+            modifier = Modifier
+                .size(250.dp)
+                .align(Alignment.BottomStart)
+                .offset(y = (+35).dp),
+            contentAlignment = Alignment.Center // Centre le bouton dans le Pad
+        ) {
+            Pad(
+                Modifier.matchParentSize(),
+                action = action1
             )
-            val action1 = game.padAction ?: return@Box
-            BouttonReglage(
+
+            ButtonRotation(
                 modifier = Modifier
                     .size(75.dp)
-                    .padding(16.dp)
-                    .align(Alignment.TopEnd),
+                    .align(Alignment.Center)
+                    .offset(y = (-35).dp),
                 onClick = {
-                    println("clique")
-                }
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(200.dp)
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center // Centre le bouton dans le Pad
-            ) {
-                Pad(
-                    Modifier.matchParentSize(), // S'assure que le Pad occupe tout l'espace du Box
-                    action = action1
-                )
-
-                ButtonRotation(
-                    modifier = Modifier
-                        .size(75.dp) // Ajuste la taille du bouton
-                        .align(Alignment.Center) // Centre le bouton dans le Box
-                        .offset(y = (-25).dp), // Décale légèrement vers le haut
-                    onClick = {
-                        game.onRotate?.let { it(game, Offset.Zero) }
-                        game.invalidate()
-                    }
-                )
-            }
-            BoutonPawh(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(140.dp)
-                    .padding(32.dp)
-                    .offset(y = (-50).dp, x = (-20).dp), // Décale légèrement vers le haut
-                onClick = {
-                    game.onDash?.let { it(game,Offset.Zero) }
+                    game.onRotate?.let { it(game, Offset.Zero) }
                     game.invalidate()
                 }
             )
         }
+        BoutonPawh(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(140.dp)
+                .padding(32.dp)
+                .offset(y = (-50).dp, x = (-20).dp), // Décale légèrement vers le haut
+            onClick = {
+                game.onDash?.let { it(game,Offset.Zero) }
+                game.invalidate()
+            }
+        )
     }
+}
 
 /*
 Courage mike, cette pièce ne va plus arriver dans le noir !

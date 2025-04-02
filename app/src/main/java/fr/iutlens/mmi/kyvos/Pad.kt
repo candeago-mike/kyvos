@@ -40,5 +40,5 @@ fun Pad(modifier: Modifier, image: Int = R.drawable.padperso, action: (Offset) -
 @Preview
 @Composable
 fun PadPreview(){
-    Pad(modifier = Modifier.width(200.dp)){_ -> }
+    Pad(modifier = Modifier.width(300.dp)){_ -> }
 }
