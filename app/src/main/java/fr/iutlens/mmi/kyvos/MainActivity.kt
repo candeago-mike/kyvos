@@ -33,9 +33,11 @@ class MainActivity : ComponentActivity() {
         loadSpritesheet(R.drawable.decor, 6, 4, 1)
         loadSpritesheet(R.drawable.perso, 6, 4)
 
-        loadSound(R.raw.message)
 
-
+        loadSound(R.raw.game_over)
+        loadSound(R.raw.bloc)
+        loadSound(R.raw.boutons)
+        loadSound(R.raw.retour)
 
         setContent {
             MyApplicationTheme {
@@ -44,9 +46,9 @@ class MainActivity : ComponentActivity() {
                 var game by remember {  mutableStateOf(makeGameA{ gameState = GameState.PERDU }) }
 
                 val isPaused = (gameState == GameState.REGLAGE)
-                    if (gameState == GameState.PLAYING || gameState == GameState.REGLAGE || gameState == GameState.PERDU) {
+                if (gameState == GameState.PLAYING || gameState == GameState.REGLAGE || gameState == GameState.PERDU || gameState== GameState.AIDE || gameState == GameState.QUITHOME) {
 
-                        Box(Modifier.fillMaxSize()) {
+                    Box(Modifier.fillMaxSize()) {
                             game.View(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -54,6 +56,18 @@ class MainActivity : ComponentActivity() {
                             )
 
                             if (!isPaused) { // Désactive les interactions si le jeu est en pause
+                                if(gameState==GameState.PLAYING){
+                                    Music(R.raw.kyvos_in_game)
+                                }
+                                BoutonHome(
+                                    modifier= Modifier
+                                        .align(Alignment.TopStart),
+                                    onHome ={
+                                        gameState = GameState.QUITHOME
+                                        game.pause = true
+                                        Music.playSound(R.raw.boutons)
+                                    }
+                                )
                                 BouttonReglage(
                                     modifier = Modifier
                                         .size(75.dp)
@@ -62,8 +76,22 @@ class MainActivity : ComponentActivity() {
                                     onClick = {
                                         gameState = GameState.REGLAGE
                                         game.pause = true
+                                        Music.playSound(R.raw.boutons)
                                     }
                                 )
+                                ButtonAide(
+                                    modifier = Modifier
+                                        .size(75.dp)
+                                        .padding(16.dp)
+                                        .offset(x=(-55).dp)
+                                        .align(Alignment.TopEnd),
+                                    onAide = {
+                                        gameState = GameState.AIDE
+                                        game.pause = true
+                                        Music.playSound(R.raw.boutons)
+                                    }
+                                )
+
                                 Box(
                                     modifier = Modifier
                                         .size(200.dp)
@@ -99,29 +127,89 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-                            if (gameState == GameState.REGLAGE) {
-                                pageReglage {
-                                    gameState = GameState.PLAYING
+                        if (gameState == GameState.REGLAGE) {
+                            pageReglage (
+                                onClick={gameState = GameState.PLAYING
                                     game.pause = false
                                     game.invalidate()
+                                    Music.playSound(R.raw.boutons)
+                                },
+                                onMute = {
+                                    mute = if (!mute) {
+                                        true
+                                    } else {
+                                        false
+                                    }
                                 }
-                            }else if(gameState == GameState.PERDU){
-                                GameOver(onYes = {gameState=GameState.PLAYING
-                                    game = makeGameA{ gameState = GameState.PERDU}}, onNo = {gameState=GameState.HOME
-                                    game = makeGameA{ gameState = GameState.PERDU}})
-                            }
+                            )
+                            Music(R.raw.lobby)
+                        }else if(gameState == GameState.PERDU){
+                            GameOver(onYes = {gameState=GameState.PLAYING
+                                game = makeGameA{ gameState = GameState.PERDU}}, onNo = {gameState=GameState.HOME
+                                game = makeGameA{ gameState = GameState.PERDU}})
+                            Music(R.raw.lobby)
+                            Music.playSound(R.raw.game_over)
+                        }else if (gameState == GameState.AIDE) {
+                            Music(R.raw.lobby)
+                        }else if (gameState == GameState.QUITHOME){
+                            Music(R.raw.lobby)
+                            QuitHome(onNo = {gameState=GameState.PLAYING
+                                game = makeGameA{ gameState = GameState.PERDU}}, onYes = {gameState=GameState.HOME
+                                game = makeGameA{ gameState = GameState.PERDU}})
+                        }
                     }
                 }else{
-                    Accueil { gameState = GameState.PLAYING }
+                    Box {
+                        Accueil (
+                            onClick = {
+                                gameState = GameState.PLAYING
+                                Music.playSound(R.raw.boutons)
+                            })
+                        Music(R.raw.kyvos_in_game)
+                        BouttonReglage(
+                            modifier = Modifier
+                                .size(75.dp)
+                                .padding(16.dp)
+                                .align(Alignment.TopEnd),
+                            onClick = {
+                                gameState = GameState.REGLAGE
+                                game.pause = true
+                                Music.playSound(R.raw.boutons)
+                            }
+                        )
+                        ButtonAide(
+                            modifier = Modifier
+                                .size(75.dp)
+                                .padding(16.dp)
+                                .offset(x=(-55).dp)
+                                .align(Alignment.TopEnd),
+                            onAide = {
+                                gameState = GameState.AIDE
+                                game.pause = true
+                                Music.playSound(R.raw.boutons)
+                            }
+                        )
+                        BoutonCredits(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter),
+                            onCredits = {gameState = GameState.CREDITS
+                                Music.playSound(R.raw.boutons)
+                            }
+                        )
+                        if (gameState==GameState.CREDITS) {
+                            Credits()
+                        }
+                    }
+
                 }
-                Music(id = R.raw.jungle)
             }
 
-}}    override fun onPause() {
+        }}    override fun onPause() {
         super.onPause()
         mute = true
     }
 }
+
 
 
 

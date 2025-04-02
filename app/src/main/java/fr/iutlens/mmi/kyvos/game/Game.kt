@@ -38,14 +38,13 @@ class Game(var background : Sprite,
            var onDragMove:  (Game.(Offset) -> Unit)? = null,
            var onTap: (Game.(Offset)-> Unit)? = null,
            var onRotate : (Game.(Offset)->Unit)? = null,
-           var onDash : (Game.(Offset)->Unit)? = null
+           var onDash : (Game.(Offset)->Unit)? = null,
         ) {
     var padAction: ((Offset) -> Unit)? = null
     var joystickPosition: JoystickPosition? = null
     var pause = false
     var gagne = true
     val timeSource = TimeSource.Monotonic
-
     /**
      * Start Instant du début du jeu, utiliser pour calculer le temps écoulé
      */

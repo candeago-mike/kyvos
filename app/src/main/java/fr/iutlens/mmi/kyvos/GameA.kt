@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,7 +50,7 @@ import kotlinx.coroutines.delay
 import java.lang.reflect.Array.set
 import kotlin.math.floor
 
-fun makeGameA(perdu : ()->Unit): Game {
+fun makeGameA(perdu : ()->Unit): Game { //13sur13
     val map = """
             111111111111111111111111111
             111111111111111111111111111
@@ -85,40 +86,7 @@ fun makeGameA(perdu : ()->Unit): Game {
                 "jklmno"
     )
 
-    val map_affiche = """
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            11111111111189a111111111111
-            111111111111efg111111111111
-            111111111111klm111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-            111111111111111111111111111
-        """.trimIndent().toMutableTileMap(
-        "123456"+
-                "789abc"+
-                "defghi"+
-                "jklmno"
-    )
+
     val pieces = listOf(
             """
         040
@@ -285,6 +253,7 @@ fun makeGameA(perdu : ()->Unit): Game {
             tableau_map[indice_map][(x - i), y] = 0
         }
         gravite(x,y)
+
     }
 
     fun checkLigne() {
@@ -303,17 +272,12 @@ fun makeGameA(perdu : ()->Unit): Game {
         }
     }
 
-
-
-
-
-
     return Game(
         background = tileMap_affiche,
         spriteList = pieceArea,
         transform = GenericTransform(
             Constraint.Fill(tileMap)
-        )
+        ),
     ).apply {
         onRotate = {
             val x = pieceArea.x0
@@ -350,7 +314,7 @@ fun makeGameA(perdu : ()->Unit): Game {
 
             update = {
                 if (!pause) {
-                    val nextY = pieceArea.y0 + tileMap.h*0.1f
+                    val nextY = pieceArea.y0 + tileMap.h*0.05f
                     val nextY_test = pieceArea.y0 + 1f*tileMap.h
                     if (angle_cible != tileMap_affiche.angle.toInt()) {
                         tileMap_affiche.angle = (tileMap_affiche.angle+5f)%360
@@ -372,7 +336,6 @@ fun makeGameA(perdu : ()->Unit): Game {
                         perdu()
                     }
                 }
-
                 invalidate()
                 }
             }
@@ -386,7 +349,7 @@ fun ButtonRotation( modifier: Modifier = Modifier,onClick: () -> Unit) {
         painter = painterResource(id = R.drawable.bouton_rotation),
         contentDescription = "Bouton Rotation",
         modifier = modifier
-            .size(75.dp) // Ajuste la taille selon tes besoins
+            .size(75.dp)
             .clickable { onClick() }
     )
 }
@@ -397,54 +360,71 @@ fun BouttonPlay( modifier: Modifier = Modifier,onClick: () -> Unit) {
         painter = painterResource(id = R.drawable.bouton_jouer),
         contentDescription = "Bouton Jouer",
         modifier = modifier
-            .size(250.dp) // Ajuste la taille selon tes besoins
-            .clickable { onClick() }, // Rendre l'image cliquable
+            .size(250.dp)
+            .clickable { onClick() },
     )
 }
+
+@Composable
+fun ButtonAide( modifier: Modifier = Modifier,onAide: () -> Unit){
+    Image(
+        painter = painterResource(id = R.drawable.bouton_aide),
+        contentDescription = "Help Button",
+        modifier = modifier
+            .size(50.dp)
+            .clickable { onAide() },
+    )}
+
+
 @Composable
 fun BouttonReglage( modifier: Modifier = Modifier,onClick: () -> Unit){
     Image(
         painter = painterResource(id = R.drawable.bouton_reglages),
-        contentDescription = "Bouton Réglagle",
+        contentDescription = "Bouton Réglage",
         modifier = modifier
             .size(50.dp)
             .clickable { onClick() },
     )
 }
 @Composable
-fun pageReglage(onClick:()->Unit={}) {
+fun pageReglage(onClick:()->Unit={},onMute:()->Unit={}) {
     Dialog(onDismissRequest = { }) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)) // Fond semi-transparent
+                .background(Color(0xFF0A0B0C).copy(alpha = 0.5f))
                 .padding(16.dp)
         ) {
+
+            BoutonContinue(
+                modifier = Modifier.align(Alignment.TopEnd),
+                onClick =onClick
+            )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        Color(0xFF578382).copy(alpha = 0.9f),
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
-                    ) // Contenu avec opacité
+                    .background(Color(0xFF578382).copy(alpha = 0.9f), shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)) // Contenu avec opacité
                     .padding(16.dp)
                     .align(Alignment.Center)
             ) {
-                Text(    text = "Paramètres",
+                Text(
+                    text = "Parameters",
                     fontSize = 32.sp,
-                    color = Color.Black,
-                    fontFamily = fontperso)
-                Spacer(modifier = Modifier.height(16.dp))
-                Row {
-                    Text(    text = "Musique : ",
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        fontFamily = fontperso)
-                    BoutonMusique(modifier = Modifier.size(24.dp))
-                }
-                BoutonContinue(
-                    onClick = onClick
+                    color = Color(0xFF0A0B0C),
+                    fontFamily = fontperso
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row {
+                    Text(text = "Music : ",
+                        fontSize = 16.sp,
+                        color =Color(0xFF0A0B0C),
+                        fontFamily = fontperso)
+                    BoutonMusique(
+                        onClick=onMute,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
     }
@@ -462,20 +442,21 @@ fun BoutonPawh(modifier: Modifier = Modifier,onClick: () -> Unit){
 @Composable
 fun BoutonContinue(modifier: Modifier = Modifier,onClick: () -> Unit){
     Image(
-        painter = painterResource(id = R.drawable.bouton_play),
-        contentDescription = "Bouton Continuer",
+        painter = painterResource(id = R.drawable.bouton_x),
+        contentDescription = "Close the parameters",
         modifier = modifier
             .size(50.dp)
             .clickable { onClick() },
     )
 }
 @Composable
-fun BoutonMusique(modifier: Modifier = Modifier){
+fun BoutonMusique(modifier: Modifier = Modifier, onClick: () -> Unit){
     Image(
         painter = painterResource(id = R.drawable.note_musique),
         contentDescription = "Bouton Musique",
         modifier = modifier
             .size(50.dp)
+            .clickable {onClick()}
     )
 }
 @Composable
@@ -488,7 +469,17 @@ fun Accueil(onClick:()->Unit={}){
         )
     }
 }
-
+@Composable
+fun BoutonCredits(modifier: Modifier = Modifier,onCredits: () -> Unit){
+    Image(
+        painter = painterResource(id = R.drawable.bouton_credits),
+        contentDescription = "Bouton Credits",
+        modifier = modifier
+            .size(150.dp)
+            .clickable { onCredits() }
+            .padding(top=100.dp)
+    )
+}
 @Composable
 fun BoutonYes(modifier: Modifier = Modifier,onClick: () -> Unit){
     Image(
@@ -500,6 +491,108 @@ fun BoutonYes(modifier: Modifier = Modifier,onClick: () -> Unit){
     )
 }
 
+@Composable
+fun BoutonHome(modifier: Modifier = Modifier,onHome: () -> Unit){
+    Image(
+        painter = painterResource(id = R.drawable.icone_home),
+        contentDescription = "Button Home",
+        modifier = modifier
+            .size(50.dp)
+            .clickable { onHome() },
+    )
+}
+
+@Composable
+fun Credits(modifier: Modifier = Modifier){
+    Box(Modifier
+        .fillMaxSize()
+        .background( Color(0xFF0A0B0C),)
+    ) {
+        Text(
+            text = "Credits",
+            fontSize = 55.sp,
+            color = Color(0xFF578382),
+            fontFamily = fontperso,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 50.dp)
+        )
+        Text(
+            text = "Kyvos, a Tetris-inspired game by Cléa Portolan and Mike Candeago",
+            fontSize = 18.sp,
+            color = Color(0xFFFFF9F0),
+            fontFamily = fontperso,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(bottom = 300.dp)
+                .padding(horizontal = 25.dp)
+        )
+        Text(
+            text = "Game development : Mike Candeago \n Design & UI : Cléa Portolan \n Music & Sound Effects : Mattéo Portolan \n Special thanks to Vincent Dubois",
+            fontSize = 18.sp,
+            color = Color(0xFFFFF9F0),
+            fontFamily = fontperso,
+            lineHeight = 40.sp,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(horizontal=25.dp)
+        )
+        Text(
+            text = "Powered by Android Studio",
+            fontSize = 18.sp,
+            color = Color(0xFFFFF9F0),
+            fontFamily = fontperso,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom=250.dp)
+                .padding(horizontal=25.dp)
+
+        )
+        Text(
+            text = "Thanks for playing !",
+            fontSize = 22.sp,
+            color = Color(0xFF578382),
+            fontFamily = fontperso,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom=50.dp)
+                .padding(horizontal=25.dp)
+
+        )
+    }
+}
+
+@Composable
+fun QuitHome(modifier: Modifier = Modifier, onYes: () -> Unit={},onNo: () -> Unit={}){
+    Box(Modifier
+        .fillMaxSize()
+        .background( Color(0xFF0A0B0C).copy(alpha = 0.8f)) // Fond semi-transparent
+    ) {
+        Text(
+            text = "Are you sure to quit the game ?",
+            fontSize = 32.sp,
+            color = Color(0xFFFFF9F0),
+            fontFamily = fontperso,
+
+            )
+        Row {
+            Image(
+                painter = painterResource(id = R.drawable.bouton_yes),
+                contentDescription = "Button Yes",
+                modifier= Modifier
+                    .size(120.dp)
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.bouton_no),
+                contentDescription = "Button No",
+                modifier= Modifier
+                    .size(120.dp)
+            )
+        }
+
+    }
+}
 @Composable
 fun BoutonNo(modifier: Modifier = Modifier,onClick: () -> Unit){
     Image(
@@ -515,7 +608,7 @@ fun BoutonNo(modifier: Modifier = Modifier,onClick: () -> Unit){
 fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
     Box(Modifier
         .fillMaxSize()
-        .background(Color.Black.copy(alpha = 0.8f)) // Fond semi-transparent
+        .background( Color(0xFF0A0B0C).copy(alpha = 0.8f)) // Fond semi-transparent
     ){
 
         Text(text = "GAME OVER",
@@ -524,7 +617,7 @@ fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
             fontFamily = fontperso,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 200.dp))
+                .padding(top=200.dp))
 
         Text(text = "Play again ?",
             fontSize = 36.sp,
@@ -532,8 +625,7 @@ fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
             fontFamily = fontperso,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(bottom = 150.dp))
-
+                .padding(bottom=150.dp))
         BoutonYes(
             modifier = Modifier
                 .align(Alignment.CenterStart),
@@ -544,13 +636,13 @@ fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
                 .align(Alignment.CenterEnd),
             onClick = onNo
         )
-            Image(
-                painter = painterResource(id = R.drawable.pieces_cassees),
-                contentDescription = "Bouton Musique",
-                modifier = Modifier
-                    .size(400.dp)
-                    .align(Alignment.BottomCenter)
-            )
+        Image(
+            painter = painterResource(id = R.drawable.pieces_cassees),
+            contentDescription = "Bouton Musique",
+            modifier = Modifier
+                .size(400.dp)
+                .align(Alignment.BottomCenter)
+        )
 
     }
 }
@@ -574,8 +666,7 @@ fun TestVideo() {
 }
 
 
-enum class GameState{HOME,PLAYING,REGLAGE,PERDU}
-
+enum class GameState{HOME,PLAYING,REGLAGE,PERDU,AIDE,CREDITS,QUITHOME}
 @Preview
 @SuppressLint("SuspiciousIndentation")
 @Composable
@@ -585,11 +676,12 @@ fun GameAPreview() {
     LocalContext.current.loadSpritesheet(R.drawable.decor, 6, 4, 1)
     LocalContext.current.loadSpritesheet(R.drawable.perso, 6, 4)
     val game = makeGameA{}
-        Box(Modifier.fillMaxSize()) {
+
+    Box(Modifier.fillMaxSize()) {
             game.View(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(androidx.compose.ui.graphics.Color.Black)
+                    .background(Color.Black)
             )
             val action1 = game.padAction ?: return@Box
             BouttonReglage(
@@ -601,6 +693,7 @@ fun GameAPreview() {
                     println("clique")
                 }
             )
+
             Box(
                 modifier = Modifier
                     .size(200.dp)
