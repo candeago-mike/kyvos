@@ -678,11 +678,21 @@ fun BoutonMusique(modifier: Modifier = Modifier, onClick: () -> Unit){
 
 @Composable
 fun Accueil(onClick:()->Unit={}){
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize()
+        .background(Color(0xFF0A0B0C))) {
         TestVideo()
         BouttonPlay(
             modifier = Modifier.align(Alignment.Center),
             onClick = onClick
+        )
+        Image(
+            painter = painterResource(id = R.drawable.logo_accueil),
+            contentDescription = "Bouton Musique",
+            modifier = Modifier
+                .size(350.dp)
+                .clickable {onClick()}
+                .align(Alignment.Center)
+                .offset(y=-150.dp)
         )
     }
 }
