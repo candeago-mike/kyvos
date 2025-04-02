@@ -314,7 +314,7 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
 
             update = {
                 if (!pause) {
-                    val nextY = pieceArea.y0 + tileMap.h*0.05f
+                    val nextY = pieceArea.y0 + tileMap.h*0.025f
                     val nextY_test = pieceArea.y0 + 1f*tileMap.h
                     if (angle_cible != tileMap_affiche.angle.toInt()) {
                         tileMap_affiche.angle = (tileMap_affiche.angle+5f)%360
