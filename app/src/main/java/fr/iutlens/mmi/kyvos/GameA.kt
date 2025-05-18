@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -46,10 +47,18 @@ import fr.iutlens.mmi.kyvos.game.sprite.tiledArea
 import fr.iutlens.mmi.kyvos.game.sprite.toMutableTileMap
 import fr.iutlens.mmi.kyvos.game.transform.Constraint
 import fr.iutlens.mmi.kyvos.game.transform.GenericTransform
+import fr.iutlens.mmi.kyvos.utils.Music.musicMuted
+import fr.iutlens.mmi.kyvos.utils.Music.soundMuted
 import fr.iutlens.mmi.kyvos.utils.loadSpritesheet
 import kotlinx.coroutines.delay
 import java.lang.reflect.Array.set
 import kotlin.math.floor
+
+enum class EtatJeu {
+    NORMAL,
+    ATTENTE_GRAVITE,
+    CHANGEMENT_MAP
+}
 
 fun makeGameA(perdu : ()->Unit): Game { //13sur13
     val map = """
@@ -296,75 +305,6 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
                     "789abc"+
                     "defghi"+
                     "jklmn0"
-        ),"""
-        020
-        222
-        """.trimIndent().toMutableTileMap(
-            "123456"+
-                    "789abc"+
-                    "defghi"+
-                    "jklmn0"
-        ),
-        """
-        20
-        22
-        02
-        """.trimIndent().toMutableTileMap(
-            "123456"+
-                    "789abc"+
-                    "defghi"+
-                    "jklmn0"
-        ),
-
-        """
-        22
-        22
-        """.trimIndent().toMutableTileMap(
-            "123456"+
-                    "789abc"+
-                    "defghi"+
-                    "jklmn0"
-        ),
-        """
-        02
-        22
-        20
-        """.trimIndent().toMutableTileMap(
-            "123456"+
-                    "789abc"+
-                    "defghi"+
-                    "jklmn0"
-        ),
-        """
-        20
-        20
-        22
-        """.trimIndent().toMutableTileMap(
-            "123456"+
-                    "789abc"+
-                    "defghi"+
-                    "jklmn0"
-        ),
-        """
-        02
-        02
-        22
-        """.trimIndent().toMutableTileMap(
-            "123456"+
-                    "789abc"+
-                    "defghi"+
-                    "jklmn0"
-        ),
-        """
-        2
-        2
-        2
-        2
-        """.trimIndent().toMutableTileMap(
-            "123456"+
-                    "789abc"+
-                    "defghi"+
-                    "jklmn0"
         ))
     fun codeBlock(code : Int) : Boolean {
         if (code == 23){
@@ -384,7 +324,7 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
     var indice_piece = 0
     var indice_map = 0
     var angle_cible = 0
-
+    var score =0
     var tileMap = R.drawable.decor.tiledArea(tableau_map[indice_map])
     val tileMap_affiche = R.drawable.decor.tiledArea(map)
     tileMap_affiche.x0=-9f*tileMap_affiche.w
@@ -455,16 +395,26 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
             tableau_map[indice_map][i, 0] = 0
         }
     }
+    var etatJeu = EtatJeu.NORMAL
+    var frameAttente = 0
+    var ligneX = 0
+    var ligneY = 0
+
+
 
     fun resetLigne(x: Int, y: Int) {
         for (i in 0..<9) {
-            tableau_map[indice_map][(x - i), y] = 0
+            tableau_map[indice_map][(x - i), y] = 1
         }
-        gravite(x,y)
-
+        ligneX = x
+        ligneY = y
+        frameAttente = 0
+        etatJeu = EtatJeu.ATTENTE_GRAVITE
     }
 
-    fun checkLigne() {
+
+
+    fun checkLigne(): Boolean {
         for (j in 0..<tableau_map[indice_map].sizeY) {
             var count = 0
             for (i in 0..<tableau_map[indice_map].sizeX) {
@@ -475,9 +425,11 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
                 }
                 if (count == 9) {
                     resetLigne(i, j)
+                    return true
                 }
             }
         }
+        return false
     }
 
     return Game(
@@ -519,34 +471,65 @@ fun makeGameA(perdu : ()->Unit): Game { //13sur13
 
         invalidate()
         animationDelayMs = 10
-
-            update = {
-                if (!pause) {
-                    val nextY = pieceArea.y0 + tileMap.h*0.025f
-                    val nextY_test = pieceArea.y0 + 1f*tileMap.h
-                    if (angle_cible != tileMap_affiche.angle.toInt()) {
-                        tileMap_affiche.angle = (tileMap_affiche.angle+5f)%360
+        update = {
+            when (etatJeu) {
+                EtatJeu.ATTENTE_GRAVITE -> {
+                    frameAttente++
+                    if (frameAttente >= 15) {
+                        gravite(ligneX, ligneY)
+                        frameAttente = 0
+                        etatJeu = EtatJeu.CHANGEMENT_MAP
                     }
+                    invalidate()
+                }
 
-                    if (pieceArea.possible(4f * tileMap.w, 1f * tileMap.h)) {
-                        if (pieceArea.possible(pieceArea.x0, nextY_test)) {
-                            pieceArea.y0 = nextY
+                EtatJeu.CHANGEMENT_MAP -> {
+                    pieceSuivante()
+                    it.spriteList = pieceArea
+                    it.score += 100
+                    it.vrai_score = it.score
+
+                    Mapsuivante()
+                    angle_cible = (angle_cible + 90) % 360
+
+                    etatJeu = EtatJeu.NORMAL
+                    invalidate()
+                }
+
+                EtatJeu.NORMAL -> {
+                    if (!pause) {
+                        if (angle_cible != tileMap_affiche.angle.toInt()) {
+                            tileMap_affiche.angle = (tileMap_affiche.angle + 5f) % 360
                         } else {
-                            pieceArea.pose()
-                            checkLigne()
-                            pieceSuivante()
-                            it.spriteList = pieceArea
+                            val nextY = pieceArea.y0 + tileMap.h * 0.025f
+                            val nextY_test = pieceArea.y0 + 1f * tileMap.h
 
-                            Mapsuivante()
-                            angle_cible = (angle_cible+90)%360
-                            invalidate()
+                            if (pieceArea.possible(4f * tileMap.w, 1f * tileMap.h)) {
+                                if (pieceArea.possible(pieceArea.x0, nextY_test)) {
+                                    pieceArea.y0 = nextY
+                                } else {
+                                    pieceArea.pose()
+                                    etatJeu = EtatJeu.CHANGEMENT_MAP
+
+                                    if (checkLigne()) {
+                                        it.score += 1000
+                                    }
+                                    checkLigne()
+                                    // Appel de resetLigne ici déclenche les autres états
+                                }
+                            } else {
+                                perdu()
+                            }
                         }
-                    } else {
-                        perdu()
                     }
+                    invalidate()
                 }
-                invalidate()
-                }
+            }
+        }
+
+
+
+
             }
     }
 val fontperso = FontFamily(
@@ -595,9 +578,9 @@ fun BouttonReglage( modifier: Modifier = Modifier,onClick: () -> Unit){
     )
 }
 
-@Preview
+//@Preview
 @Composable
-fun pageReglage(onClick:()->Unit={},onMute:()->Unit={}) {
+fun pageReglage(modifier:Modifier=Modifier, onClick:()->Unit={}) {
     Dialog(onDismissRequest = { }) {
         Box(
             modifier = Modifier
@@ -616,7 +599,7 @@ fun pageReglage(onClick:()->Unit={},onMute:()->Unit={}) {
                     .background(
                         Color(0xFF578382).copy(alpha = 0.9f),
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
-                    ) // Contenu avec opacité
+                    ) // Contenu avec opacitÃ©
                     .padding(16.dp)
                     .align(Alignment.Center)
             ) {
@@ -627,15 +610,38 @@ fun pageReglage(onClick:()->Unit={},onMute:()->Unit={}) {
                     fontFamily = fontperso
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-
-                Row {
-                    Text(text = "Music : ",
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Music : ",
                         fontSize = 16.sp,
-                        color =Color(0xFF0A0B0C),
-                        fontFamily = fontperso)
+                        color = Color(0xFF0A0B0C),
+                        fontFamily = fontperso
+                    )
                     BoutonMusique(
-                        onClick=onMute,
-                        modifier = Modifier.size(24.dp)
+                        icon = painterResource(
+                            id = if (musicMuted) R.drawable.note_music_off else R.drawable.note_musique
+                        ),
+                        onClick = { musicMuted = !musicMuted },
+                        modifier = Modifier.size(45 .dp)
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Sound effect : ",
+                        fontSize = 16.sp,
+                        color = Color(0xFF0A0B0C),
+                        fontFamily = fontperso
+                    )
+                    BoutonMusique(
+                        icon = painterResource(
+                            id = if (soundMuted) R.drawable.sound_off else R.drawable.sound_on
+                        ),
+                        onClick = { soundMuted = !soundMuted },
+                        modifier = Modifier.size(40 .dp)
                     )
                 }
             }
@@ -665,16 +671,14 @@ fun BoutonFermer(modifier: Modifier = Modifier,onClick: () -> Unit){
     )
 }
 @Composable
-fun BoutonMusique(modifier: Modifier = Modifier, onClick: () -> Unit){
+fun BoutonMusique(modifier: Modifier = Modifier, icon : Painter, onClick: () -> Unit){
     Image(
-        painter = painterResource(id = R.drawable.note_musique),
+        painter = icon,
         contentDescription = "Bouton Musique",
         modifier = modifier
-            .size(50.dp)
             .clickable { onClick() }
     )
 }
-
 
 @Composable
 fun Accueil(onClick:()->Unit={}){
@@ -687,7 +691,7 @@ fun Accueil(onClick:()->Unit={}){
         )
         Image(
             painter = painterResource(id = R.drawable.logo_accueil),
-            contentDescription = "Bouton Musique",
+            contentDescription = "",
             modifier = Modifier
                 .size(350.dp)
                 .clickable {onClick()}
@@ -807,7 +811,7 @@ fun BoutonHome(modifier: Modifier = Modifier,onHome: () -> Unit){
     )
 }
 
-@Preview
+//@Preview
 @Composable
 fun Aide(modifier : Modifier = Modifier, onClick: () -> Unit={}) {
     Box(Modifier
@@ -866,9 +870,9 @@ fun QuitHome(modifier: Modifier = Modifier, onYes: () -> Unit={},onNo: () -> Uni
 
     }
 }
-@Preview
+//@Preview
 @Composable
-fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
+fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={},score : Int = -1){
     Box(Modifier
         .fillMaxSize()
         .background(Color(0xFF0A0B0C).copy(alpha = 0.8f)) // Fond semi-transparent
@@ -881,7 +885,17 @@ fun GameOver(onYes: () -> Unit={},onNo: () -> Unit={}){
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 150.dp))
-
+        Text(
+            text = "Score : ${score}",
+            fontSize = 24.sp,
+            fontFamily = fontperso,
+            color = Color.White,
+            modifier = Modifier
+                .padding(16.dp)
+                .background(Color.Black.copy(alpha = 0.5f), shape = RoundedCornerShape(8.dp))
+                .padding(8.dp)
+                .align(Alignment.TopCenter)
+        )
         Text(text = "Play again ?",
             fontSize = 36.sp,
             color = Color(0xFFFFF9F0),
@@ -938,7 +952,6 @@ fun TestVideo() {
     )
 }
 
-
 enum class GameState{HOME,PLAYING,REGLAGE,PERDU,AIDE,CREDITS,QUITHOME}
 
 @Preview
@@ -973,9 +986,9 @@ fun GameAPreview() {
         )
         Box(
             modifier = Modifier
-                .size(250.dp)
+                .size(350.dp)
                 .align(Alignment.BottomStart)
-                .offset(y = (+35).dp),
+                .offset(y = (+75).dp,x=(+20).dp),
             contentAlignment = Alignment.Center // Centre le bouton dans le Pad
         ) {
             Pad(
@@ -985,9 +998,9 @@ fun GameAPreview() {
 
             ButtonRotation(
                 modifier = Modifier
-                    .size(75.dp)
+                    .size(120.dp)
                     .align(Alignment.Center)
-                    .offset(y = (-35).dp),
+                    .offset(y = (-45).dp),
                 onClick = {
                     game.onRotate?.let { it(game, Offset.Zero) }
                     game.invalidate()
@@ -997,9 +1010,9 @@ fun GameAPreview() {
         BoutonPawh(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .size(140.dp)
+                .size(120.dp)
                 .padding(32.dp)
-                .offset(y = (-50).dp, x = (-20).dp), // Décale légèrement vers le haut
+                .offset(y = (-10).dp, x = (-20).dp), // Décale légèrement vers le haut
             onClick = {
                 game.onDash?.let { it(game,Offset.Zero) }
                 game.invalidate()

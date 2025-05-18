@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 
+
 /**
  * Music permet de jouer de la musique ou des sons pendant le jeu
  *
@@ -22,8 +23,8 @@ object Music {
     /**
      * mute permet d'activer ou désactiver le son joué par l'application
      */
-    var mute by mutableStateOf(true)
-
+    var musicMuted by mutableStateOf(true)
+    var soundMuted by mutableStateOf(true)
     /**
      * Sound pool gère les bruitages (jusqu'à 10 en simultané ici)
      */
@@ -70,8 +71,8 @@ object Music {
                   priority: Int = 1,
                   loop: Int = 0,
                   rate: Float = 1f
-                  ){
-        if (mute) return
+    ){
+        if (soundMuted) return
         soundMap[id]?.let { soundId -> soundPool.play(soundId,leftVolume,rightVolume,priority, loop, rate) }
     }
 
@@ -79,7 +80,7 @@ object Music {
     @Composable
     operator fun invoke(id: Int){
         val context = LocalContext.current
-        val musicPlayer by remember(id to mute) {
+        val musicPlayer by remember(id to musicMuted) {
             derivedStateOf {
                 MediaPlayer.create(context, id).apply {
                     setAudioAttributes(
@@ -91,7 +92,7 @@ object Music {
             }
         }
 
-        if (!mute) DisposableEffect(id) {
+        if (!musicMuted) DisposableEffect(id) {
             musicPlayer.apply {
                 isLooping = true
                 start()

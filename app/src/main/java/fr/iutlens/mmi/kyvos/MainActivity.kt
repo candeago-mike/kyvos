@@ -7,9 +7,12 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,10 +20,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import fr.iutlens.mmi.kyvos.utils.Music.mute
+import androidx.compose.ui.unit.sp
 import fr.iutlens.mmi.kyvos.ui.theme.MyApplicationTheme
 import fr.iutlens.mmi.kyvos.utils.Music
+import fr.iutlens.mmi.kyvos.utils.Music.musicMuted
+import fr.iutlens.mmi.kyvos.utils.Music.soundMuted
 import fr.iutlens.mmi.kyvos.utils.loadSound
 
 import fr.iutlens.mmi.kyvos.utils.loadSpritesheet
@@ -53,14 +60,24 @@ class MainActivity : ComponentActivity() {
                         game.View(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(androidx.compose.ui.graphics.Color(0xFF0A0B0C))
+                                .background(Color(0xFF0A0B0C))
                         )
 
                         if (!isPaused) { // Désactive les interactions si le jeu est en pause
                             if(gameState==GameState.PLAYING){
                                 Music(R.raw.kyvos_in_game)
                             }
-
+                            Text(
+                                text = "Score : ${game.vrai_score}",
+                                fontSize = 24.sp,
+                                fontFamily = fontperso,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .background(Color.Black.copy(alpha = 0.5f), shape = RoundedCornerShape(8.dp))
+                                    .padding(8.dp)
+                                    .align(Alignment.TopCenter)
+                            )
                             BoutonHome(
                                 modifier= Modifier
                                     .align(Alignment.TopStart),
@@ -90,7 +107,7 @@ class MainActivity : ComponentActivity() {
                                     .align(Alignment.TopEnd),
                                 onAide = {
                                     stateRetour=gameState
-                                    gameState = GameState.AIDE
+                                     gameState = GameState.AIDE
                                     game.pause =true
                                     Music.playSound(R.raw.boutons)
                                 }
@@ -98,37 +115,39 @@ class MainActivity : ComponentActivity() {
 
                             Box(
                                 modifier = Modifier
-                                    .size(225.dp)
+                                    .size(275.dp)
                                     .align(Alignment.BottomStart)
-                                    .offset(y = (+35).dp),
+                                    .offset(y = (+65).dp,x=(+30).dp),
                                 contentAlignment = Alignment.Center // Centre le bouton dans le Pad
                             ) {
                                 Pad(Modifier.matchParentSize()){offset -> game.padAction?.let { it(offset) } }
 
                                 ButtonRotation(
                                     modifier = Modifier
-                                        .size(75.dp)
+                                        .size(100.dp)
                                         .align(Alignment.Center)
-                                        .offset(y = (-35).dp),
+                                        .offset(y = (-40).dp),
                                     onClick = {
                                         game.onRotate?.let { it(game, Offset.Zero) }
                                         game.invalidate()
                                     }
                                 )
                             }
+
                             BoutonPawh(
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
-                                    .size(140.dp)
+                                    .size(120.dp)
                                     .padding(32.dp)
                                     .offset(
-                                        y = (-30).dp,
+                                        y = (-0).dp,
                                     ), // Décale légèrement vers le haut
                                 onClick = {
                                     game.onDash?.let { it(game, Offset.Zero) }
                                     game.invalidate()
-                                }
-                            )
+                                })
+
+
                         }
                         if (gameState == GameState.REGLAGE) {
                             pageReglage (
@@ -137,20 +156,16 @@ class MainActivity : ComponentActivity() {
                                     game.pause = false
                                     game.invalidate()
                                     Music.playSound(R.raw.boutons)
-                                },
-                                onMute = {
-                                    mute = if (!mute) {
-                                        true
-                                    } else {
-                                        false
-                                    }
                                 }
                             )
+
                             Music(R.raw.lobby)
-                        }else if(gameState == GameState.PERDU){
+                        }
+                        else if(gameState == GameState.PERDU){
                             GameOver(onYes = {gameState=GameState.PLAYING
                                 game = makeGameA{ gameState = GameState.PERDU}}, onNo = {gameState=GameState.HOME
-                                game = makeGameA{ gameState = GameState.PERDU}})
+                                game = makeGameA{ gameState = GameState.PERDU}},
+                                score = game.vrai_score)
                             Music(R.raw.lobby)
                             Music.playSound(R.raw.game_over)
                         }else if (gameState == GameState.AIDE) {
@@ -226,7 +241,8 @@ class MainActivity : ComponentActivity() {
 
         }}    override fun onPause() {
         super.onPause()
-        mute = true
+        musicMuted = true
+        soundMuted=true
     }
 }
 

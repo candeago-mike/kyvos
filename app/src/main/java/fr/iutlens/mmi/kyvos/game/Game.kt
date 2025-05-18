@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -15,6 +16,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import fr.iutlens.mmi.kyvos.JoystickPosition
 import fr.iutlens.mmi.kyvos.game.sprite.Sprite
 import fr.iutlens.mmi.kyvos.game.transform.CameraTransform
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlin.time.TimeSource
 
@@ -45,6 +47,10 @@ class Game(var background : Sprite,
     var pause = false
     var gagne = true
     val timeSource = TimeSource.Monotonic
+    var score by mutableStateOf(0)
+    var vrai_score by mutableStateOf(0)
+    var downHoldJob: Job? = null
+
     /**
      * Start Instant du début du jeu, utiliser pour calculer le temps écoulé
      */
@@ -59,6 +65,7 @@ class Game(var background : Sprite,
      * Nombre de milliseconde souhaité entre deux images
      */
     var animationDelayMs: Int? = null
+    var delai: Int? = null
 
     /**
      * Update : action à réaliser entre deux images
@@ -115,7 +122,7 @@ class Game(var background : Sprite,
                 LaunchedEffect(elapsed){
                     //Calcul du temps avant d'afficher la prochaine image, et pause si nécessaire)
                     val current = (timeSource.markNow()-start).inWholeMilliseconds
-                    val next = elapsed+ delay
+                    val next = elapsed + delay
                     if (next>current) delay(next-current)
                     myUpdate(this@Game)
                 }
